@@ -71,7 +71,7 @@ function drawXPGraph(transactions) {
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             ${yLabels}
             ${xLabels}
-            <polyline points="${polylinePoints}" fill="none" stroke="#4f46e5" stroke-width="2"/>
+            <polyline points="${polylinePoints}" fill="none" stroke="#a68b5b" stroke-width="2"/>
         </svg>
     `;
 
@@ -97,7 +97,7 @@ function drawAuditGraph(auditData) {
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             <!-- Done bar -->
             <rect x="${width / 2 - barWidth - 20}" y="${height - padding - doneH}"
-                  width="${barWidth}" height="${doneH}" fill="#4f46e5" rx="4"/>
+                  width="${barWidth}" height="${doneH}" fill="#a68b5b" rx="4"/>
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Done</text>
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - padding - doneH - 8}"
@@ -105,7 +105,7 @@ function drawAuditGraph(auditData) {
 
             <!-- Received bar -->
             <rect x="${width / 2 + 20}" y="${height - padding - receivedH}"
-                  width="${barWidth}" height="${receivedH}" fill="#e54f4f" rx="4"/>
+                  width="${barWidth}" height="${receivedH}" fill="#c4856a" rx="4"/>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Received</text>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - padding - receivedH - 8}"
@@ -155,11 +155,11 @@ function drawResultsGraph(results) {
 
     let paths = "";
     if (passed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#48bb78"/>`;
+        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#7daa6e"/>`;
     } else if (failed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#e53e3e"/>`;
+        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#c4856a"/>`;
     } else {
-        paths = arc(0, passAngle, "#48bb78") + arc(passAngle, 360, "#e53e3e");
+        paths = arc(0, passAngle, "#7daa6e") + arc(passAngle, 360, "#c4856a");
     }
 
     const svg = `
@@ -169,9 +169,9 @@ function drawResultsGraph(results) {
             <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="ratio-text">${Math.round(passRatio * 100)}%</text>
             <text x="${cx}" y="${cy + 16}" text-anchor="middle" class="axis-text">pass rate</text>
 
-            <circle cx="${cx - 55}" cy="${height - 15}" r="5" fill="#48bb78"/>
+            <circle cx="${cx - 55}" cy="${height - 15}" r="5" fill="#7daa6e"/>
             <text x="${cx - 44}" y="${height - 11}" class="axis-text">Pass (${passed})</text>
-            <circle cx="${cx + 25}" cy="${height - 15}" r="5" fill="#e53e3e"/>
+            <circle cx="${cx + 25}" cy="${height - 15}" r="5" fill="#c4856a"/>
             <text x="${cx + 36}" y="${height - 11}" class="axis-text">Fail (${failed})</text>
         </svg>
     `;
