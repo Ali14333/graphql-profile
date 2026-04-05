@@ -75,6 +75,8 @@ async function loadProfile() {
         const results = await getResults();
 
         const totalXP = xpData.reduce((sum, t) => sum + t.amount, 0);
+        const passed = results.filter(r => r.grade >= 1).length;
+        const failed = results.filter(r => r.grade < 1).length;
 
         document.getElementById("user-info").innerHTML = `
             <div class="info-card">
@@ -84,6 +86,7 @@ async function loadProfile() {
                 <p>Audit Ratio: ${auditData.auditRatio.toFixed(1)}</p>
                 <p>Audits Done: ${formatXP(auditData.totalUp)}</p>
                 <p>Audits Received: ${formatXP(auditData.totalDown)}</p>
+                <p>Projects Passed: ${passed} | Failed: ${failed}</p>
             </div>
         `;
 

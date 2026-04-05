@@ -14,7 +14,7 @@ body {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* ── Login ── */
@@ -32,7 +32,7 @@ body {
     font-size: 2rem;
     color: #fff;
     font-family: 'Space Mono', monospace;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 #login-form {
@@ -41,16 +41,16 @@ body {
     align-items: center;
     gap: 1rem;
     width: 100%;
-    max-width: 340px;
+    max-width: 320px;
 }
 
 #login-form input {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
     border: 2px solid rgba(255,255,255,0.3);
     border-radius: 10px;
     background: rgba(255,255,255,0.15);
     color: #fff;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-family: 'DM Sans', sans-serif;
     transition: border-color 0.2s;
     width: 100%;
@@ -67,12 +67,12 @@ body {
 }
 
 #login-form button {
-    padding: 0.75rem 1.5rem;
+    padding: 0.6rem 1.5rem;
     border: 2px solid #fff;
     border-radius: 10px;
     background: #fff;
     color: #667eea;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
     font-family: 'DM Sans', sans-serif;
@@ -88,7 +88,6 @@ body {
     color: #fed7d7;
     min-height: 1.2em;
     font-size: 0.85rem;
-    text-align: center;
 }
 
 /* ── Header ── */
@@ -211,4 +210,5 @@ header h1 {
 @media (max-width: 600px) {
     .info-card { margin: 1rem; }
     .graph-container { padding: 0 1rem 1rem; }
+    #login-form { width: 90%; }
 }
