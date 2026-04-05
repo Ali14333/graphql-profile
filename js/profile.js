@@ -16,8 +16,8 @@ async function getXP() {
     const data = await fetchGraphQL(`{
         transaction(
             where: {
-            type: { _eq: "xp" }
-            path: { _like: "%/bh-module/%" }
+                type: { _eq: "xp" }
+                path: { _like: "%/bh-module/%" }
             }
             order_by: { createdAt: asc }
         ) {
@@ -29,7 +29,6 @@ async function getXP() {
             }
         }
     }`);
-    console.log("XP paths:", data.transaction.map(t => t.path));
     return data.transaction;
 }
 
@@ -47,9 +46,9 @@ async function getAuditRatio() {
 async function getResults() {
     const data = await fetchGraphQL(`{
         result(
-        where: {
-        path: { _like: "%/bh-module/%" }
-        }
+            where: {
+                path: { _like: "%/bh-module/%" }
+            }
             order_by: { createdAt: asc }
         ) {
             grade
@@ -79,14 +78,31 @@ async function loadProfile() {
         const failed = results.filter(r => r.grade < 1).length;
 
         document.getElementById("user-info").innerHTML = `
-            <div class="info-card">
-                <h2>Welcome, ${user.login}</h2>
-                <p>User ID: ${user.id}</p>
-                <p>Total XP: ${formatXP(totalXP)}</p>
-                <p>Audit Ratio: ${auditData.auditRatio.toFixed(1)}</p>
-                <p>Audits Done: ${formatXP(auditData.totalUp)}</p>
-                <p>Audits Received: ${formatXP(auditData.totalDown)}</p>
-                <p>Projects Passed: ${passed} | Failed: ${failed}</p>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="label">User</div>
+                    <div class="value">${user.login}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Total XP</div>
+                    <div class="value">${formatXP(totalXP)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Audit Ratio</div>
+                    <div class="value">${auditData.auditRatio.toFixed(1)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Audits Done</div>
+                    <div class="value">${formatXP(auditData.totalUp)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Audits Received</div>
+                    <div class="value">${formatXP(auditData.totalDown)}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Pass / Fail</div>
+                    <div class="value">${passed} / ${failed}</div>
+                </div>
             </div>
         `;
 

@@ -27,30 +27,28 @@ function renderGraphs() {
 
 function drawXPGraph(transactions) {
     const width = 600;
-    const height = 300;
+    const height = 260;
     const padding = 50;
 
-    // Build cumulative XP over time
     let cumulative = 0;
     const points = transactions.map((t) => {
         cumulative += t.amount;
         return { date: new Date(t.createdAt), xp: cumulative };
     });
 
+    if (points.length === 0) return;
+
     const minDate = points[0].date.getTime();
     const maxDate = points[points.length - 1].date.getTime();
     const maxXP = cumulative;
 
-    // Scale helpers
     const scaleX = (date) =>
-        padding + ((date.getTime() - minDate) / (maxDate - minDate)) * (width - padding * 2);
+        padding + ((date.getTime() - minDate) / (maxDate - minDate || 1)) * (width - padding * 2);
     const scaleY = (xp) =>
-        height - padding - (xp / maxXP) * (height - padding * 2);
+        height - padding - (xp / (maxXP || 1)) * (height - padding * 2);
 
-    // Build polyline points
     const polylinePoints = points.map((p) => `${scaleX(p.date)},${scaleY(p.xp)}`).join(" ");
 
-    // Y-axis labels (5 ticks)
     let yLabels = "";
     for (let i = 0; i <= 4; i++) {
         const xp = (maxXP / 4) * i;
@@ -60,7 +58,6 @@ function drawXPGraph(transactions) {
         yLabels += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" class="grid-line"/>`;
     }
 
-    // X-axis labels (first and last date)
     const formatDate = (d) => `${d.getMonth() + 1}/${d.getFullYear()}`;
     const xLabels = `
         <text x="${padding}" y="${height - 15}" class="axis-text">${formatDate(points[0].date)}</text>
@@ -71,7 +68,7 @@ function drawXPGraph(transactions) {
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             ${yLabels}
             ${xLabels}
-            <polyline points="${polylinePoints}" fill="none" stroke="#a68b5b" stroke-width="2"/>
+            <polyline points="${polylinePoints}" fill="none" stroke="#7b5b3a" stroke-width="2"/>
         </svg>
     `;
 
@@ -80,13 +77,13 @@ function drawXPGraph(transactions) {
 
 function drawAuditGraph(auditData) {
     const width = 400;
-    const height = 300;
+    const height = 260;
     const padding = 50;
 
     const maxVal = Math.max(auditData.totalUp, auditData.totalDown);
     const barWidth = 80;
 
-    const scaleH = (val) => ((val / maxVal) * (height - padding * 2));
+    const scaleH = (val) => ((val / (maxVal || 1)) * (height - padding * 2));
 
     const doneH = scaleH(auditData.totalUp);
     const receivedH = scaleH(auditData.totalDown);
@@ -95,40 +92,35 @@ function drawAuditGraph(auditData) {
 
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-            <!-- Done bar -->
+            <text x="${width / 2}" y="25" text-anchor="middle" class="ratio-text">
+                Ratio: ${auditData.auditRatio.toFixed(1)}
+            </text>
+
             <rect x="${width / 2 - barWidth - 20}" y="${height - padding - doneH}"
-                  width="${barWidth}" height="${doneH}" fill="#a68b5b" rx="4"/>
+                  width="${barWidth}" height="${doneH}" fill="#7b5b3a" rx="4"/>
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Done</text>
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - padding - doneH - 8}"
                   text-anchor="middle" class="axis-text">${formatMB(auditData.totalUp)}</text>
 
-            <!-- Received bar -->
             <rect x="${width / 2 + 20}" y="${height - padding - receivedH}"
-                  width="${barWidth}" height="${receivedH}" fill="#c4856a" rx="4"/>
+                  width="${barWidth}" height="${receivedH}" fill="#c4956a" rx="4"/>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Received</text>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - padding - receivedH - 8}"
                   text-anchor="middle" class="axis-text">${formatMB(auditData.totalDown)}</text>
-
-            <!-- Ratio text -->
-            <text x="${width / 2}" y="25" text-anchor="middle" class="ratio-text">
-                Ratio: ${auditData.auditRatio.toFixed(1)}
-            </text>
         </svg>
     `;
 
     document.getElementById("audit-graph").innerHTML = svg;
 }
 
-export { renderGraphs };
-
 function drawResultsGraph(results) {
     const width = 400;
-    const height = 300;
+    const height = 260;
     const cx = width / 2;
     const cy = height / 2;
-    const r = 100;
+    const r = 85;
 
     const passed = results.filter(res => res.grade >= 1).length;
     const failed = results.filter(res => res.grade < 1).length;
@@ -155,26 +147,28 @@ function drawResultsGraph(results) {
 
     let paths = "";
     if (passed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#7daa6e"/>`;
+        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#6b8f5e"/>`;
     } else if (failed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#c4856a"/>`;
+        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#b5694d"/>`;
     } else {
-        paths = arc(0, passAngle, "#7daa6e") + arc(passAngle, 360, "#c4856a");
+        paths = arc(0, passAngle, "#6b8f5e") + arc(passAngle, 360, "#b5694d");
     }
 
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             ${paths}
-            <circle cx="${cx}" cy="${cy}" r="55" fill="#fff"/>
+            <circle cx="${cx}" cy="${cy}" r="48" fill="#f5ebe0"/>
             <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="ratio-text">${Math.round(passRatio * 100)}%</text>
-            <text x="${cx}" y="${cy + 16}" text-anchor="middle" class="axis-text">pass rate</text>
+            <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="axis-text">pass rate</text>
 
-            <circle cx="${cx - 55}" cy="${height - 15}" r="5" fill="#7daa6e"/>
-            <text x="${cx - 44}" y="${height - 11}" class="axis-text">Pass (${passed})</text>
-            <circle cx="${cx + 25}" cy="${height - 15}" r="5" fill="#c4856a"/>
-            <text x="${cx + 36}" y="${height - 11}" class="axis-text">Fail (${failed})</text>
+            <circle cx="${cx - 55}" cy="${height - 12}" r="5" fill="#6b8f5e"/>
+            <text x="${cx - 44}" y="${height - 8}" class="axis-text">Pass (${passed})</text>
+            <circle cx="${cx + 25}" cy="${height - 12}" r="5" fill="#b5694d"/>
+            <text x="${cx + 36}" y="${height - 8}" class="axis-text">Fail (${failed})</text>
         </svg>
     `;
 
     document.getElementById("results-graph").innerHTML = svg;
 }
+
+export { renderGraphs };
