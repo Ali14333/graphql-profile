@@ -161,10 +161,10 @@ function drawResultsGraph(results) {
             <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="ratio-text">${Math.round(passRatio * 100)}%</text>
             <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="axis-text">pass rate</text>
 
-            <circle cx="${cx - 55}" cy="${height - 12}" r="5" fill="#6b8f5e"/>
-            <text x="${cx - 44}" y="${height - 8}" class="axis-text">Pass (${passed})</text>
-            <circle cx="${cx + 25}" cy="${height - 12}" r="5" fill="#b5694d"/>
-            <text x="${cx + 36}" y="${height - 8}" class="axis-text">Fail (${failed})</text>
+            <circle cx="${cx - 70}" cy="${height - 12}" r="5" fill="#6b8f5e"/>
+            <text x="${cx - 59}" y="${height - 8}" class="axis-text">Pass (${passed})</text>
+            <circle cx="${cx + 30}" cy="${height - 12}" r="5" fill="#b5694d"/>
+            <text x="${cx + 41}" y="${height - 8}" class="axis-text">Fail (${failed})</text>
         </svg>
     `;
 
