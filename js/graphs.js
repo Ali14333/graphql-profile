@@ -1,5 +1,4 @@
-function renderGraphs() {
-    const { xpData, auditData, results } = window.profileData;
+function renderGraphs(xpData, user, results) {
     const container = document.getElementById("graphs");
 
     container.innerHTML = `
@@ -21,7 +20,7 @@ function renderGraphs() {
     `;
 
     drawXPGraph(xpData);
-    drawAuditGraph(auditData);
+    drawAuditGraph(user);
     drawResultsGraph(results);
 }
 
@@ -75,25 +74,25 @@ function drawXPGraph(transactions) {
     document.getElementById("xp-graph").innerHTML = svg;
 }
 
-function drawAuditGraph(auditData) {
+function drawAuditGraph(user) {
     const width = 400;
     const height = 260;
     const padding = 50;
 
-    const maxVal = Math.max(auditData.totalUp, auditData.totalDown);
+    const maxVal = Math.max(user.totalUp, user.totalDown);
     const barWidth = 80;
 
     const scaleH = (val) => ((val / (maxVal || 1)) * (height - padding * 2));
 
-    const doneH = scaleH(auditData.totalUp);
-    const receivedH = scaleH(auditData.totalDown);
+    const doneH = scaleH(user.totalUp);
+    const receivedH = scaleH(user.totalDown);
 
     const formatMB = (val) => (val / 1000000).toFixed(2) + " MB";
 
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             <text x="${width / 2}" y="25" text-anchor="middle" class="ratio-text">
-                Ratio: ${auditData.auditRatio.toFixed(1)}
+                Ratio: ${user.auditRatio.toFixed(1)}
             </text>
 
             <rect x="${width / 2 - barWidth - 20}" y="${height - padding - doneH}"
@@ -101,14 +100,14 @@ function drawAuditGraph(auditData) {
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Done</text>
             <text x="${width / 2 - barWidth / 2 - 20}" y="${height - padding - doneH - 8}"
-                  text-anchor="middle" class="axis-text">${formatMB(auditData.totalUp)}</text>
+                  text-anchor="middle" class="axis-text">${formatMB(user.totalUp)}</text>
 
             <rect x="${width / 2 + 20}" y="${height - padding - receivedH}"
                   width="${barWidth}" height="${receivedH}" fill="#c4956a" rx="4"/>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - 15}"
                   text-anchor="middle" class="axis-text">Received</text>
             <text x="${width / 2 + barWidth / 2 + 20}" y="${height - padding - receivedH - 8}"
-                  text-anchor="middle" class="axis-text">${formatMB(auditData.totalDown)}</text>
+                  text-anchor="middle" class="axis-text">${formatMB(user.totalDown)}</text>
         </svg>
     `;
 
