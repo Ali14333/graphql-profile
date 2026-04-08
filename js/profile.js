@@ -1,12 +1,14 @@
 import { fetchGraphQL } from "./graphql.js";
 import { renderGraphs } from "./graphs.js";
 
-async function getUserInfo() {
+async function getUser() {
     const data = await fetchGraphQL(`{
         user {
             id
             login
-            attrs
+            auditRatio
+            totalUp
+            totalDown
         }
     }`);
     return data.user[0];
@@ -30,17 +32,6 @@ async function getXP() {
         }
     }`);
     return data.transaction;
-}
-
-async function getAuditRatio() {
-    const data = await fetchGraphQL(`{
-        user {
-            auditRatio
-            totalUp
-            totalDown
-        }
-    }`);
-    return data.user[0];
 }
 
 async function getResults() {
@@ -68,9 +59,8 @@ function formatXP(bytes) {
 
 async function loadProfile() {
     try {
-        const user = await getUserInfo();
+        const user = await getUser();
         const xpData = await getXP();
-        const auditData = await getAuditRatio();
         const results = await getResults();
 
         const totalXP = xpData.reduce((sum, t) => sum + t.amount, 0);
@@ -89,15 +79,15 @@ async function loadProfile() {
                 </div>
                 <div class="stat-item">
                     <div class="label">Audit Ratio</div>
-                    <div class="value">${auditData.auditRatio.toFixed(1)}</div>
+                    <div class="value">${user.auditRatio.toFixed(1)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="label">Audits Done</div>
-                    <div class="value">${formatXP(auditData.totalUp)}</div>
+                    <div class="value">${formatXP(user.totalUp)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="label">Audits Received</div>
-                    <div class="value">${formatXP(auditData.totalDown)}</div>
+                    <div class="value">${formatXP(user.totalDown)}</div>
                 </div>
                 <div class="stat-item">
                     <div class="label">Pass / Fail</div>
@@ -106,8 +96,7 @@ async function loadProfile() {
             </div>
         `;
 
-        window.profileData = { xpData, auditData, results };
-        renderGraphs();
+        renderGraphs(xpData, user, results);
     } catch (err) {
         console.error("Failed to load profile:", err);
     }
