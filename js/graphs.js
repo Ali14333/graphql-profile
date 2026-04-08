@@ -118,9 +118,7 @@ function drawAuditGraph(auditData) {
 function drawResultsGraph(results) {
     const width = 400;
     const height = 260;
-    const cx = width / 2;
-    const cy = height / 2;
-    const r = 85;
+    const padding = 50;
 
     const passed = results.filter(res => res.grade >= 1).length;
     const failed = results.filter(res => res.grade < 1).length;
@@ -131,40 +129,29 @@ function drawResultsGraph(results) {
         return;
     }
 
-    const passRatio = passed / total;
-    const passAngle = passRatio * 360;
+    const maxVal = Math.max(passed, failed);
+    const barWidth = 80;
 
-    function arc(startAngle, endAngle, color) {
-        const startRad = (startAngle - 90) * Math.PI / 180;
-        const endRad = (endAngle - 90) * Math.PI / 180;
-        const x1 = cx + r * Math.cos(startRad);
-        const y1 = cy + r * Math.sin(startRad);
-        const x2 = cx + r * Math.cos(endRad);
-        const y2 = cy + r * Math.sin(endRad);
-        const large = endAngle - startAngle > 180 ? 1 : 0;
-        return `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${color}"/>`;
-    }
+    const scaleH = (val) => ((val / (maxVal || 1)) * (height - padding * 2));
 
-    let paths = "";
-    if (passed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#6b8f5e"/>`;
-    } else if (failed === total) {
-        paths = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#b5694d"/>`;
-    } else {
-        paths = arc(0, passAngle, "#6b8f5e") + arc(passAngle, 360, "#b5694d");
-    }
+    const passH = scaleH(passed);
+    const failH = scaleH(failed);
 
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-            ${paths}
-            <circle cx="${cx}" cy="${cy}" r="48" fill="#f5ebe0"/>
-            <text x="${cx}" y="${cy - 4}" text-anchor="middle" class="ratio-text">${Math.round(passRatio * 100)}%</text>
-            <text x="${cx}" y="${cy + 14}" text-anchor="middle" class="axis-text">pass rate</text>
+            <rect x="${width / 2 - barWidth - 20}" y="${height - padding - passH}"
+                  width="${barWidth}" height="${passH}" fill="#6b8f5e" rx="4"/>
+            <text x="${width / 2 - barWidth / 2 - 20}" y="${height - 15}"
+                  text-anchor="middle" class="axis-text">Pass</text>
+            <text x="${width / 2 - barWidth / 2 - 20}" y="${height - padding - passH - 8}"
+                  text-anchor="middle" class="axis-text">${passed}</text>
 
-            <circle cx="${cx - 70}" cy="${height - 12}" r="5" fill="#6b8f5e"/>
-            <text x="${cx - 59}" y="${height - 8}" class="axis-text">Pass (${passed})</text>
-            <circle cx="${cx + 30}" cy="${height - 12}" r="5" fill="#b5694d"/>
-            <text x="${cx + 41}" y="${height - 8}" class="axis-text">Fail (${failed})</text>
+            <rect x="${width / 2 + 20}" y="${height - padding - failH}"
+                  width="${barWidth}" height="${failH}" fill="#b5694d" rx="4"/>
+            <text x="${width / 2 + barWidth / 2 + 20}" y="${height - 15}"
+                  text-anchor="middle" class="axis-text">Fail</text>
+            <text x="${width / 2 + barWidth / 2 + 20}" y="${height - padding - failH - 8}"
+                  text-anchor="middle" class="axis-text">${failed}</text>
         </svg>
     `;
 
