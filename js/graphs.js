@@ -1,6 +1,8 @@
+// Called from profile.js with the fetched data passed as arguments
 function renderGraphs(xpData, user, results) {
     const container = document.getElementById("graphs");
 
+    // Create the graph card containers, then draw into them
     container.innerHTML = `
         <h2>Statistics</h2>
         <div class="graph-container">
@@ -24,11 +26,15 @@ function renderGraphs(xpData, user, results) {
     drawResultsGraph(results);
 }
 
+// ── XP LINE GRAPH ──
+// SVG <polyline> connects data points into a line showing cumulative XP over time
 function drawXPGraph(transactions) {
+    // viewBox dimensions — SVG scales to fit its container regardless of these numbers
     const width = 600;
     const height = 260;
-    const padding = 50;
+    const padding = 50; // space for axis labels
 
+    // Build cumulative XP: each point = previous total + this transaction's amount
     let cumulative = 0;
     const points = transactions.map((t) => {
         cumulative += t.amount;
@@ -41,13 +47,23 @@ function drawXPGraph(transactions) {
     const maxDate = points[points.length - 1].date.getTime();
     const maxXP = cumulative;
 
+    // SCALING FUNCTIONS — convert data values to SVG pixel coordinates
+    // scaleX: maps a date to an x position
+    //   (date - min) / (max - min) gives a 0-to-1 fraction
+    //   multiply by drawable width, offset by padding
     const scaleX = (date) =>
         padding + ((date.getTime() - minDate) / (maxDate - minDate || 1)) * (width - padding * 2);
+
+    // scaleY: maps an XP value to a y position
+    //   SVG y=0 is the TOP, so we subtract from (height - padding) to flip it
+    //   higher XP = smaller y = drawn higher on screen
     const scaleY = (xp) =>
         height - padding - (xp / (maxXP || 1)) * (height - padding * 2);
 
+    // Build "x1,y1 x2,y2 x3,y3..." string for the polyline
     const polylinePoints = points.map((p) => `${scaleX(p.date)},${scaleY(p.xp)}`).join(" ");
 
+    // Y-axis: 5 evenly spaced labels + horizontal grid lines
     let yLabels = "";
     for (let i = 0; i <= 4; i++) {
         const xp = (maxXP / 4) * i;
@@ -57,12 +73,15 @@ function drawXPGraph(transactions) {
         yLabels += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" class="grid-line"/>`;
     }
 
+    // X-axis: just the first and last date
     const formatDate = (d) => `${d.getMonth() + 1}/${d.getFullYear()}`;
     const xLabels = `
         <text x="${padding}" y="${height - 15}" class="axis-text">${formatDate(points[0].date)}</text>
         <text x="${width - padding}" y="${height - 15}" text-anchor="end" class="axis-text">${formatDate(points[points.length - 1].date)}</text>
     `;
 
+    // <polyline> draws connected line segments through all the points
+    // fill="none" means just the line, no filled area underneath
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             ${yLabels}
@@ -74,14 +93,18 @@ function drawXPGraph(transactions) {
     document.getElementById("xp-graph").innerHTML = svg;
 }
 
+// ── AUDIT BAR CHART ──
+// Two <rect> bars comparing audits done vs received
 function drawAuditGraph(user) {
     const width = 400;
     const height = 260;
     const padding = 50;
 
+    // Find the larger value so we can scale both bars relative to it
     const maxVal = Math.max(user.totalUp, user.totalDown);
     const barWidth = 80;
 
+    // Scale a value to a pixel height within the drawable area
     const scaleH = (val) => ((val / (maxVal || 1)) * (height - padding * 2));
 
     const doneH = scaleH(user.totalUp);
@@ -89,6 +112,8 @@ function drawAuditGraph(user) {
 
     const formatMB = (val) => (val / 1000000).toFixed(2) + " MB";
 
+    // <rect> x,y is the TOP-LEFT corner, so y = bottom - barHeight to grow upward
+    // rx="4" rounds the corners
     const svg = `
         <svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
             <text x="${width / 2}" y="25" text-anchor="middle" class="ratio-text">
@@ -114,11 +139,14 @@ function drawAuditGraph(user) {
     document.getElementById("audit-graph").innerHTML = svg;
 }
 
+// ── PASS/FAIL BAR CHART ──
+// Same pattern as audit graph — two bars, one for pass count, one for fail count
 function drawResultsGraph(results) {
     const width = 400;
     const height = 260;
     const padding = 50;
 
+    // Count passes (grade >= 1) and fails (grade < 1)
     const passed = results.filter(res => res.grade >= 1).length;
     const failed = results.filter(res => res.grade < 1).length;
     const total = passed + failed;
@@ -131,6 +159,7 @@ function drawResultsGraph(results) {
     const maxVal = Math.max(passed, failed);
     const barWidth = 80;
 
+    // Same scaling logic: value / max * drawable height
     const scaleH = (val) => ((val / (maxVal || 1)) * (height - padding * 2));
 
     const passH = scaleH(passed);
