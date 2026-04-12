@@ -2,6 +2,8 @@ import { getToken } from "./auth.js";
 
 const GRAPHQL_URL = "https://learn.reboot01.com/api/graphql-engine/v1/graphql";
 
+// generic function to send a GraphQL query with the JWT token
+// returns the data object from the response or throws on error
 async function fetchGraphQL(query, variables = {}) {
     const token = getToken();
 

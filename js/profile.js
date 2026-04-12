@@ -1,6 +1,7 @@
 import { fetchGraphQL } from "./graphql.js";
 import { renderGraphs } from "./graphs.js";
 
+// get basic user info (id, login, attributes)
 async function getUserInfo() {
     const data = await fetchGraphQL(`{
         user {
@@ -12,6 +13,9 @@ async function getUserInfo() {
     return data.user[0];
 }
 
+// get all XP transactions for the main module only
+// filters out piscine and other paths so we only count real project xp
+// ordered by date so we can graph progress over time
 async function getXP() {
     const data = await fetchGraphQL(`{
         transaction(
@@ -32,6 +36,8 @@ async function getXP() {
     return data.transaction;
 }
 
+// get audit ratio and totals from the user table
+// totalUp = how much you audited others, totalDown = how much others audited you
 async function getAuditRatio() {
     const data = await fetchGraphQL(`{
         user {
@@ -43,6 +49,8 @@ async function getAuditRatio() {
     return data.user[0];
 }
 
+// get pass/fail results for projects in the main module
+// grade >= 1 means pass, grade < 1 means fail
 async function getResults() {
     const data = await fetchGraphQL(`{
         result(
@@ -60,12 +68,14 @@ async function getResults() {
     return data.result;
 }
 
+// format raw byte values into readable strings (kB, MB)
 function formatXP(bytes) {
     if (bytes >= 1000000) return (bytes / 1000000).toFixed(2) + " MB";
     if (bytes >= 1000) return (bytes / 1000).toFixed(1) + " kB";
     return bytes + " B";
 }
 
+// main function that fetches everything and builds the profile page
 async function loadProfile() {
     try {
         const user = await getUserInfo();
@@ -73,10 +83,14 @@ async function loadProfile() {
         const auditData = await getAuditRatio();
         const results = await getResults();
 
+        // add up all xp transactions to get the total
         const totalXP = xpData.reduce((sum, t) => sum + t.amount, 0);
+
+        // count passes (grade >= 1) vs fails (grade < 1)
         const passed = results.filter(r => r.grade >= 1).length;
         const failed = results.filter(r => r.grade < 1).length;
 
+        // render the stats cards into the user info section
         document.getElementById("user-info").innerHTML = `
             <div class="stats-grid">
                 <div class="stat-item">
@@ -106,6 +120,7 @@ async function loadProfile() {
             </div>
         `;
 
+        // store data globally so graphs.js can access it
         window.profileData = { xpData, auditData, results };
         renderGraphs();
     } catch (err) {

@@ -2,11 +2,12 @@ import { loadProfile } from "./profile.js";
 
 const SIGNIN_URL = "https://learn.reboot01.com/api/auth/signin";
 
+// encode username:password into base64 for Basic auth header
 function encodeCredentials(username, password) {
     return btoa(`${username}:${password}`);
 }
 
-// POST to signin endpoint, return JWT
+// send credentials to the signin endpoint and get back a JWT token
 async function login(username, password) {
     const response = await fetch(SIGNIN_URL, {
         method: "POST",
@@ -23,7 +24,7 @@ async function login(username, password) {
     return token;
 }
 
-// Save JWT to localstorage
+// localStorage helpers for the JWT
 function saveToken(token) {
     localStorage.setItem("jwt", token);
 }
@@ -36,7 +37,7 @@ function removeToken() {
     localStorage.removeItem("jwt");
 }
 
-// Show/hide sections
+// toggle between login and profile views
 function showProfile() {
     document.getElementById("login-section").classList.add("hidden");
     document.getElementById("profile-section").classList.remove("hidden");
@@ -47,7 +48,7 @@ function showLogin() {
     document.getElementById("login-section").classList.remove("hidden");
 }
 
-// Wire up the form
+// handle login form submission
 document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const username = document.getElementById("username").value;
@@ -65,13 +66,13 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     }
 });
 
-// Logout
+// handle logout, clear the token and go back to login screen
 document.getElementById("logout-btn").addEventListener("click", () => {
     removeToken();
     showLogin();
 });
 
-// On page load, check if already logged in
+// if the user already has a token saved, skip login and load profile
 if (getToken()) {
     showProfile();
     loadProfile();
