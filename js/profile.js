@@ -13,15 +13,16 @@ async function getUserInfo() {
     return data.user[0];
 }
 
-// get all XP transactions for the main module only
-// filters out piscine and other paths so we only count real project xp
+// get all XP transactions scoped to bahrain campus
+// filters to only projects and piscine so exercises dont inflate the total
 // ordered by date so we can graph progress over time
 async function getXP() {
     const data = await fetchGraphQL(`{
         transaction(
             where: {
                 type: { _eq: "xp" }
-                path: { _like: "%/bh-module/%" }
+                path: { _like: "/bahrain/%" }
+                object: { type: { _in: ["project", "piscine"] } }
             }
             order_by: { createdAt: asc }
         ) {
@@ -30,6 +31,7 @@ async function getXP() {
             path
             object {
                 name
+                type
             }
         }
     }`);
@@ -49,15 +51,18 @@ async function getAuditRatio() {
     return data.user[0];
 }
 
-// get pass/fail results for projects in the main module
-// grade >= 1 means pass, grade < 1 means fail
+// get pass/fail results for projects only
+// distinct_on objectId so we only get the latest result per project
+// this prevents retries from counting as extra fails
 async function getResults() {
     const data = await fetchGraphQL(`{
         result(
             where: {
-                path: { _like: "%/bh-module/%" }
+                path: { _like: "/bahrain/%" }
+                object: { type: { _eq: "project" } }
             }
-            order_by: { createdAt: asc }
+            order_by: [{ objectId: asc }, { createdAt: desc }]
+            distinct_on: objectId
         ) {
             grade
             object {
