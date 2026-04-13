@@ -49,9 +49,8 @@ async function getAuditRatio() {
     return data.user[0];
 }
 
-// get pass/fail results for top level projects only
-// distinct_on objectId so we only get the latest result per project
-// this prevents retries from counting as extra fails
+// get all pass/fail results for top level projects
+// includes all attempts so the ratio reflects every try, not just the latest
 async function getResults() {
     const data = await fetchGraphQL(`{
         result(
@@ -59,8 +58,7 @@ async function getResults() {
                 path: { _like: "/bahrain/bh-module/%", _nlike: "/bahrain/bh-module/%/%" }
                 object: { type: { _eq: "project" } }
             }
-            order_by: [{ objectId: asc }, { createdAt: desc }]
-            distinct_on: objectId
+            order_by: { createdAt: asc }
         ) {
             grade
             object {
