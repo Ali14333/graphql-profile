@@ -13,16 +13,15 @@ async function getUserInfo() {
     return data.user[0];
 }
 
-// get all XP transactions scoped to bahrain campus
-// filters to only projects and piscine so exercises dont inflate the total
+// get XP transactions for top level projects in bh-module only
+// _nlike excludes deeper nested paths (exercises inside piscines/checkpoints)
 // ordered by date so we can graph progress over time
 async function getXP() {
     const data = await fetchGraphQL(`{
         transaction(
             where: {
                 type: { _eq: "xp" }
-                path: { _like: "/bahrain/%" }
-                object: { type: { _in: ["project", "piscine"] } }
+                path: { _like: "/bahrain/bh-module/%", _nlike: "/bahrain/bh-module/%/%" }
             }
             order_by: { createdAt: asc }
         ) {
@@ -31,7 +30,6 @@ async function getXP() {
             path
             object {
                 name
-                type
             }
         }
     }`);
@@ -51,14 +49,14 @@ async function getAuditRatio() {
     return data.user[0];
 }
 
-// get pass/fail results for projects only
+// get pass/fail results for top level projects only
 // distinct_on objectId so we only get the latest result per project
 // this prevents retries from counting as extra fails
 async function getResults() {
     const data = await fetchGraphQL(`{
         result(
             where: {
-                path: { _like: "/bahrain/%" }
+                path: { _like: "/bahrain/bh-module/%", _nlike: "/bahrain/bh-module/%/%" }
                 object: { type: { _eq: "project" } }
             }
             order_by: [{ objectId: asc }, { createdAt: desc }]
